@@ -12,7 +12,7 @@ createRoot(document.getElementById("root")).render(
     <Router>
       <Routes>
         <Route path="/" element={<ValentineInvite />} />
-        <Route path="/invite/:id" element={<ValentineResponse />} />
+        <Route path="/invite/" element={<ValentineResponse />} />
       </Routes>
     </Router>
     {/* </BrowserRouter> */}

@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaHeart } from "react-icons/fa";
+import { supabase } from "./supabaseClient";
 
 export default function ValentineResponse() {
-  const location = useLocation();
+  // const location = useLocation();
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState(null);
@@ -27,11 +28,38 @@ export default function ValentineResponse() {
   const currentButtonTextIndex = useRef(0);
   const noButtonRef = useRef(null);
 
+  const query = new URLSearchParams(useLocation().search);
+
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    setName(params.get("name") || "Someone");
-    setMessage(params.get("message") || "You have a secret admirer!");
-  }, [location.search]);
+    const fetchData = async () => {
+      const shortId = query.get("id");
+      if (!shortId) return;
+
+      try {
+        // Fetch data from Supabase using the short ID
+        const { data, error } = await supabase
+          .from("valentine_messages")
+          .select("*")
+          .eq("short_id", shortId.trim())
+          .maybeSingle();
+
+        if (error) {
+          console.error("Error fetching message:", error.message);
+        } else if (!data) {
+          console.log("No message found for this ID.");
+        } else {
+          console.log("Fetched message:", data);
+        }
+
+        setName(data.name);
+        setMessage(data.message);
+      } catch (error) {
+        console.error("Error fetching message:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleNoClick = () => {
     if (currentButtonTextIndex.current < arrButton.length - 1) {
@@ -42,7 +70,7 @@ export default function ValentineResponse() {
       }
     } else {
       setResponse("accepted");
-      setShowModal(true); // Show the modal when accepted
+      setShowModal(true);
     }
   };
 
@@ -58,7 +86,7 @@ export default function ValentineResponse() {
             duration: 2,
             repeat: Infinity,
             repeatType: "reverse",
-            delay: i * 0.2,
+            delay: i * 0.1,
           }}
           className="text-red-600 absolute"
           style={{
@@ -98,7 +126,7 @@ export default function ValentineResponse() {
 
             <button
               ref={noButtonRef}
-              className="border px-6 py-1 rounded-lg hover:bg-red-600 hover:border-red-600 hover:shadow-lg duration-500 cursor-pointer transition-all"
+              className="border px-6 py-1 rounded-lg hover:bg-red-600 hover:text-white hover:border-red-600 hover:shadow-lg duration-500 cursor-pointer transition-all"
               onClick={handleNoClick}
             >
               {arrButton[currentButtonTextIndex.current]}

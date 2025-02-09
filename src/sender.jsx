@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { nanoid } from "nanoid";
+import { supabase } from "./supabaseClient";
 
 export default function ValentineInvite() {
   const [sent, setSent] = useState(false);
@@ -8,19 +10,28 @@ export default function ValentineInvite() {
   const [link, setLink] = useState("");
   const [showAlert, setShowAlert] = useState(false);
 
-  const generateLink = () => {
+  const generateLink = async () => {
     if (!name || !message) {
       setShowAlert(true);
       return;
     }
-    const uniqueId = Math.random().toString(36).substring(7);
-    const inviteLink = `${
-      window.location.origin
-    }/invite/${uniqueId}?name=${encodeURIComponent(
-      name
-    )}&message=${encodeURIComponent(message)}`;
-    setLink(inviteLink);
-    setSent(true);
+
+    try {
+      const shortId = nanoid(10);
+
+      const { error } = await supabase
+        .from("valentine_messages")
+        .insert([{ short_id: shortId, name, message }]);
+
+      if (error) throw error;
+
+      // Create the short link
+      const inviteLink = `${window.location.origin}/invite?id=${shortId}`;
+      setLink(inviteLink);
+      setSent(true);
+    } catch (error) {
+      console.error("Error generating link:", error);
+    }
   };
 
   return (
