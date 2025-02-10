@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaHeart } from "react-icons/fa";
 import { supabase } from "./supabaseClient";
+import { div } from "framer-motion/client";
 
 export default function ValentineResponse() {
   // const location = useLocation();
@@ -10,6 +11,7 @@ export default function ValentineResponse() {
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const arrButton = [
     "No",
@@ -56,6 +58,7 @@ export default function ValentineResponse() {
       } catch (error) {
         console.error("Error fetching message:", error);
       }
+      setLoading(false);
     };
 
     fetchData();
@@ -96,6 +99,17 @@ export default function ValentineResponse() {
       console.error("Error updating response:", error.message);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen">
+        <div className="text-pink-500 text-6xl animate-pulse">❤️</div>
+        <p className="mt-4 text-pink-500 text-lg animate-pulse">
+          Loading your message...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-pink-100 to-red-100 text-center p-6">
