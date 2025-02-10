@@ -72,8 +72,7 @@ export default function ValentineResponse() {
           arrButton[currentButtonTextIndex.current];
       }
     } else {
-      setResponse("accepted");
-      setShowModal(true);
+      handleResponse("accepted");
     }
   };
 
