@@ -9,7 +9,7 @@ export default function ValentineResponse() {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState(null);
-  const [showModal, setShowModal] = useState(false); // New state for the accepted modal
+  const [showModal, setShowModal] = useState(false);
 
   const arrButton = [
     "No",
@@ -74,6 +74,29 @@ export default function ValentineResponse() {
     }
   };
 
+  const handleResponse = async (answer) => {
+    setResponse(answer);
+    setShowModal(true);
+
+    const shortId = query.get("id");
+    if (!shortId) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("valentine_messages")
+        .update({ response: answer })
+        .eq("short_id", shortId);
+
+      if (error) {
+        console.error("Error saving response:", error.message);
+      }
+    } catch (error) {
+      console.error("Error updating response:", error.message);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-pink-100 to-red-100 text-center p-6">
       {/* Floating hearts background */}
@@ -117,8 +140,7 @@ export default function ValentineResponse() {
               whileTap={{ scale: 0.9 }}
               className="bg-gradient-to-r from-pink-500 to-red-500 cursor-pointer text-white px-6 py-1 rounded-lg hover:shadow-lg transition-all"
               onClick={() => {
-                setResponse("accepted");
-                setShowModal(true); // Show modal on 'Yes' click
+                handleResponse("accepted");
               }}
             >
               Yes

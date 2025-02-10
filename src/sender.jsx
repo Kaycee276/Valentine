@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { nanoid } from "nanoid";
 import { supabase } from "./supabaseClient";
+import { FaPaperclip } from "react-icons/fa";
 
 export default function ValentineInvite() {
   const [sent, setSent] = useState(false);
@@ -31,6 +32,30 @@ export default function ValentineInvite() {
       setSent(true);
     } catch (error) {
       console.error("Error generating link:", error);
+    }
+  };
+
+  const checkResponse = async () => {
+    const shortId = link.split("id=")[1];
+
+    try {
+      const { data, error } = await supabase
+        .from("valentine_messages")
+        .select("response")
+        .eq("short_id", shortId)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data.response) {
+        alert(
+          `Your Valentine has responded! And they ${data.response} your request`
+        );
+      } else {
+        alert("Your Valentine has not responded yet!");
+      }
+    } catch (error) {
+      console.error("Error fetching response:", error);
     }
   };
 
@@ -114,15 +139,24 @@ export default function ValentineInvite() {
               {link.length > 50 ? `${link.substring(0, 50)}...` : link}
             </a>
 
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(link);
-                alert("Link copied to clipboard!");
-              }}
-              className="mt-4 bg-blue-500 text-white px-3 py-1 rounded-full hover:bg-blue-600 transition cursor-pointer"
-            >
-              Copy Link 📋
-            </button>
+            <div className="flex justify-center gap-5">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(link);
+                  alert("Link copied to clipboard!");
+                }}
+                className="mt-4  text-black px-3 py-1 rounded-full flex items-center gap-0.5 hover:shadow hover:shadow-pink-400 transition cursor-pointer"
+              >
+                <FaPaperclip className="text-black" /> <span>Copy Link</span>
+              </button>
+
+              <button
+                onClick={checkResponse}
+                className="mt-4 bg-red-500 text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-red-600 transition-all"
+              >
+                Check Response
+              </button>
+            </div>
           </div>
         )}
       </motion.div>
